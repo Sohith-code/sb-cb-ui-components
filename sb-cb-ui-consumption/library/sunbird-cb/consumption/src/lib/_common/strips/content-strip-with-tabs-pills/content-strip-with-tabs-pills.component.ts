@@ -1473,6 +1473,8 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
 
   async canShowSakshamAiTab(strip: any) {
     try {
+      if(strip?.key !== 'cbpPlan') return 
+
       let userProfile = this.configSvc && this.configSvc.userProfile
       if(userProfile.rootOrgId) {
         let response = await this.userSvc.getOrgReadData(userProfile.rootOrgId).toPromise();
@@ -1485,6 +1487,7 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
         }
       }
     } catch (error) {
+        if(strip?.key !== 'cbpPlan') return 
         strip.tabs[1].hideTab = true
     }
   }
