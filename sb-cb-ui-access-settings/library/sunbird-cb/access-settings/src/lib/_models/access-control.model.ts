@@ -95,6 +95,7 @@ export namespace NsAccessControlConfig {
     summaryText: string;
     canShowSummaryTab: boolean;
     canShowTranscriptTab: boolean;
+    instructionVideoPath: string;
   }
 
   export enum IAccessSetting {
