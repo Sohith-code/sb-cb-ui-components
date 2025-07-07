@@ -156,6 +156,8 @@ input {
         padding: 8px 16px;
         border: 1px solid rgba(0, 0, 0, .1607843137);
         border-radius: 72px;
+        box-sizing: border-box;
+        height: 45px;
     }
     &.editBorder {
         border-radius: 16px 16px 0 0;

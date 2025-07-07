@@ -62,8 +62,10 @@ export class MemberDetailsComponent implements OnInit{
     ) {
       this.communityMembersList = res?.result?.response?.content
       this.totalNumberOfMembers =  res?.result?.response?.count
-    } else {
+      
+    } else {  
       this.communityMembersList = []
+      this.totalNumberOfMembers = 0
     }
   })
   }
