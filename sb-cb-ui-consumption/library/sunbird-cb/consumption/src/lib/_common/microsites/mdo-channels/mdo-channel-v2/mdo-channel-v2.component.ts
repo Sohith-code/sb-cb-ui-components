@@ -7,6 +7,7 @@ import * as _ from 'lodash'
 import { TranslateService } from '@ngx-translate/core'
 import { MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'
+import { getTabSectionDataKey } from '../../tab-section.util'
 
 @Component({
     selector: 'sb-uic-mdo-channel-v2',
@@ -24,6 +25,7 @@ export class MdoChannelV2Component implements OnInit {
     selectedIndex = 0
     hideCompetencyBlock: boolean = false
     contentTabEmptyResponseCount: number = 0
+    getTabDataKey = getTabSectionDataKey
     titles = [
         { title: 'Learn', url: '/page/learn', icon: 'school', disableTranslate: false },
         {

@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog'
 import { StripAddContentComponent } from '../strip-add-content/strip-add-content.component'
 import { AddTabDialogComponent } from '../add-tab-dialog/add-tab-dialog.component'
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component'
+import { getTabSectionDataKey } from '../../../tab-section.util'
 
 @Component({
     selector: 'app-main-content',
@@ -18,6 +19,7 @@ export class MainContentComponent implements OnInit {
   selectedIndex = 0;
   hideCompetencyBlock = false;
   contentTabEmptyResponseCount = 0;
+  getTabDataKey = getTabSectionDataKey;
   showModal = false;
   stripSections: any[] = [];
   sectionData: any

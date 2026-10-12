@@ -155,48 +155,37 @@
         </div>
 
         <!-- Tabs -->
-        <!-- <ng-container *ngIf="!data?.tabSection?.disable  || isEdit">
+        @if (!data?.tabSection?.disable || isEdit) {
           <mat-tab-group animationDuration="0ms" class="mat-tab-labels mytabs w-full" [selectedIndex]="selectedIndex"
             (selectedTabChange)="tabClicked($event)">
 
-            <!-- Content Tab
-            <mat-tab label="Content">
-              <ng-template mat-tab-label i18n>Learn</ng-template>
-              <!-- Empty state
-              <ng-container *ngIf="data?.tabSection?.contentTab?.length === contentTabEmptyResponseCount">
-                <div class="flex justify-center w-full">
-                  <div class="margin-xl text-center">
-                    <img src="/assets/common/error-pages/empty_search.svg" alt="No results"
-                      class="margin-top-l margin-bottom-s">
-                    <h2 class="mat-h2">{{'learnsearch.noResults' | translate}}</h2>
+            <!-- Tabs driven by tabSection.tabs; each tab's sections live at tabSection[<dataKey>] -->
+            @for (tab of data?.tabSection?.tabs; track $index) {
+              <mat-tab [label]="tab.name">
+                <ng-template mat-tab-label>{{ tab.name }}</ng-template>
+                <!-- Empty state -->
+                @if (getTabDataKey(tab) === 'contentTab'
+                  && data?.tabSection?.contentTab?.length === contentTabEmptyResponseCount) {
+                  <div class="flex justify-center w-full">
+                    <div class="margin-xl text-center">
+                      <img src="/assets/common/error-pages/empty_search.svg" alt="No results"
+                        class="margin-top-l margin-bottom-s">
+                      <h2 class="mat-h2">{{'learnsearch.noResults' | translate}}</h2>
+                    </div>
                   </div>
+                }
+                <div [class.padding-top-l]="getTabDataKey(tab) === 'contentTab'">
+                  <app-column-section-display [data]="data.tabSection[getTabDataKey(tab)]" [orgId]="orgId"
+                    [channelName]="channelName" [isEdit]="isEdit" (competencyEvent)="hideCompetency($event)"
+                    (competencyTelemetry)="raiseCompetencyTelemetry($event)"
+                    (contentTelemetry)="raiseTelemetryInteratEvent($event)"
+                    (viewAllEvent)="showAllContent($event.event, $event.data)">
+                  </app-column-section-display>
                 </div>
-              </ng-container>
-              <!-- Content tab content
-              <div class="padding-top-l">
-                <app-column-section-display [data]="data.tabSection.contentTab" [orgId]="orgId" [isEdit]="isEdit"
-                  [channelName]="channelName" (competencyEvent)="hideCompetency($event)"
-                  (competencyTelemetry)="raiseCompetencyTelemetry($event)"
-                  (contentTelemetry)="raiseTelemetryInteratEvent($event)"
-                  (viewAllEvent)="showAllContent($event.event, $event.data)">
-                </app-column-section-display>
-              </div>
-            </mat-tab>
-
-            <!-- Competency Tab
-            <mat-tab label="Core Areas">
-              <ng-template mat-tab-label i18n>Competency</ng-template>
-              <div>
-                <app-column-section-display [data]="data.tabSection.coreAreasTab" [orgId]="orgId"
-                  [channelName]="channelName" [isEdit]="isEdit" (competencyEvent)="hideCompetency($event)"
-                  (competencyTelemetry)="raiseCompetencyTelemetry($event)"
-                  (contentTelemetry)="raiseTelemetryInteratEvent($event)"
-                  (viewAllEvent)="showAllContent($event.event, $event.data)">
-                </app-column-section-display>
-              </div>
-            </mat-tab>
+              </mat-tab>
+            }
           </mat-tab-group>
-        </ng-container> -->
+        }
       </div>
 
       <!-- Sidebar -->

@@ -281,36 +281,29 @@
                         <mat-tab-group animationDuration="0ms" class="mat-tab-labels mytabs w-full "
                             [selectedIndex]="selectedIndex"
                             (selectedTabChange)="selectedIndex = $event.index; tabClicked($event)">
-                            <mat-tab label="Content">
-                                <ng-template mat-tab-label i18n>
-                                    Learn
-                                </ng-template>
-                                <ng-container
-                                    *ngIf="data?.tabSection?.contentTab?.length === contentTabEmptyResponseCount">
-                                    <div class="flex justify-center w-full">
-                                        <div class="margin-xl text-center">
-                                            <img src="/assets/common/error-pages/empty_search.svg"
-                                                wsUtilsImageResponsive alt="No results"
-                                                class="margin-top-l margin-bottom-s">
-                                            <h2 class="mat-h2" i18n="search route no result">{{'learnsearch.noResults'}}
-                                            </h2>
+                            @for (tab of data?.tabSection?.tabs; track $index) {
+                                <mat-tab [label]="tab.name">
+                                    <ng-template mat-tab-label>
+                                        {{ tab.name }}
+                                    </ng-template>
+                                    @if (getTabDataKey(tab) === 'contentTab'
+                                        && data?.tabSection?.contentTab?.length === contentTabEmptyResponseCount) {
+                                        <div class="flex justify-center w-full">
+                                            <div class="margin-xl text-center">
+                                                <img src="/assets/common/error-pages/empty_search.svg"
+                                                    wsUtilsImageResponsive alt="No results"
+                                                    class="margin-top-l margin-bottom-s">
+                                                <h2 class="mat-h2" i18n="search route no result">{{'learnsearch.noResults'}}
+                                                </h2>
+                                            </div>
                                         </div>
+                                    }
+                                    <div [class.padding-top-l]="getTabDataKey(tab) === 'contentTab'">
+                                        <ng-container [ngTemplateOutlet]="columnSectionDisplay"
+                                            [ngTemplateOutletContext]="{data: data.tabSection[getTabDataKey(tab)]}"></ng-container>
                                     </div>
-                                </ng-container>
-                                <div class="padding-top-l ">
-                                    <ng-container [ngTemplateOutlet]="columnSectionDisplay"
-                                        [ngTemplateOutletContext]="{data: data.tabSection.contentTab}"></ng-container>
-                                </div>
-                            </mat-tab>
-                            <mat-tab label="Core Areas">
-                                <ng-template mat-tab-label i18n>
-                                    Competency
-                                </ng-template>
-                                <div>
-                                    <ng-container [ngTemplateOutlet]="columnSectionDisplay"
-                                        [ngTemplateOutletContext]="{data: data.tabSection.coreAreasTab}"></ng-container>
-                                </div>
-                            </mat-tab>
+                                </mat-tab>
+                            }
                         </mat-tab-group>
                     </ng-container>
 
