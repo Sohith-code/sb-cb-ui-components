@@ -25,6 +25,21 @@
         </div>
       </ng-container>
 
+      @if(isComprehensiveAssessment && !forPreview && isAssessmentCompleted && assessmentResult){
+        <div class="flex flex-col gap-1 px-4 py-3 rounded-lg text-left assessment-score-card">
+          <div class="flex items-center justify-between" [ngClass]="isAssessmentPassed ? 'score-passed' : 'score-failed'">
+            <span class="text-3xl font-bold leading-9">{{ assessmentResult.score | number: '1.0-2' }}%</span>
+            <span class="text-sm font-bold">
+              {{ (isAssessmentPassed ? 'apptochome.passed' : 'apptochome.failed') | translate }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-xs leading-4 score-label">
+            <span>{{ 'apptochome.bestScore' | translate }}</span>
+            <span>{{ 'apptochome.passMark' | translate }} {{ assessmentResult.passPercentage | number: '1.0-2' }}%</span>
+          </div>
+        </div>
+      }
+
       <!-- Course block -->
       <ng-container *ngIf="contentReadData?.primaryCategory !== primaryCategory.PROGRAM
                     && contentReadData?.primaryCategory !== primaryCategory.CURATED_PROGRAM

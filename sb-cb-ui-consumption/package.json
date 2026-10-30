@@ -61,7 +61,7 @@
     "@ngx-translate/http-loader": "4.0.0",
     "@sunbird-cb/design-system": "0.0.4",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
-    "@sunbird-cb/utils-v2": "0.2.4-cbrelease-4.8.41",
+    "@sunbird-cb/utils-v2": "0.1.0-cbrelease-4.8.42",
     "ckeditor5": "^43.1.0",
     "dayjs": "^1.10.7",
     "jspdf": "^2.5.1",

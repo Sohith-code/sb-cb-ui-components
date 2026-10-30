@@ -22,3 +22,8 @@ export interface IComprehensiveAssessmentAttempts {
   attemptsRemaining: number
   isAttempted: boolean
 }
+
+export interface IComprehensiveAssessmentResult {
+  score: number
+  passPercentage: number
+}

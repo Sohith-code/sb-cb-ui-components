@@ -23,8 +23,8 @@ import { WidgetContentService } from '../../_services/widget-content.service'
 import { viewerRouteGenerator } from '../../_services/viewer-route-util'
 import { NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import {
-  ConfigurationsService, DataTransferService, EventService,
-  LoggerService, MultilingualTranslationsService,
+  APP_DB_STORES, ConfigurationsService, DataTransferService, EventService,
+  IndexedDbService, LoggerService, MultilingualTranslationsService,
   NsPage, TFetchStatus, TelemetryService,
   UtilityService, WidgetEnrollService, WsEvents,
 } from '@sunbird-cb/utils-v2'
@@ -55,7 +55,11 @@ import { NsCardContent } from '../../models/card-content.model'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
 import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
-import { IComprehensiveAssessmentAttempts, IComprehensiveAssessmentStatus } from '../../_models/common.model'
+import {
+  IComprehensiveAssessmentAttempts,
+  IComprehensiveAssessmentResult,
+  IComprehensiveAssessmentStatus,
+} from '../../_models/common.model'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -146,6 +150,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     attemptsRemaining: 0,
     isAttempted: false,
   }
+  assessmentResult: IComprehensiveAssessmentResult | null = null
   askAuthorEnabled = true
   trainingLHubEnabled = false
   trainingLHubCount$?: Observable<number>
@@ -325,7 +330,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     public dataTransferSvc: DataTransferService,
     private matSnackbarNew: MatSnackbarNew,
     private userServiceLib: WidgetUserServiceLib,
-    private userCbpPlansSvc: UserCbpPlansService,
+    private appDb: IndexedDbService,
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
     private location: Location,
@@ -408,23 +413,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return res.filter((v: any) => v.identifier === this.courseID)
   }
 
-  // The first CBPlan V4 plan holding the content, checked APAR → CBP → AI-CBP.
-  async getPlanForContent(doId: string): Promise<IUserCbpPlan | undefined> {
-    if (!doId) {
-      return undefined
-    }
-    const data = await this.userCbpPlansSvc.getUserCbpPlansAsync()
-    if (!data) {
-      return undefined
-    }
-    const plans = [...(data.aparPlanList || []), ...(data.cbpPlanList || []), ...(data.aiCbpPlanList || [])]
-    return plans.find((plan: IUserCbpPlan) =>
-      (plan.contentList || []).some((content: IUserCbpPlanContent) => content && content.identifier === doId))
-  }
-
   async findACPB() {
-    // CBPlan V4: the plan holding this course, from UserCbpPlansService.
-    const plan = await this.getPlanForContent(this.courseID)
+    // CBPlan V4: the plan holding this course, from the allPlansMap cache.
+    const plansMap = await this.appDb.withTimeout(
+      this.appDb.get<Record<string, any>>(APP_DB_STORES.PLANS_MAP, 'all'),
+      'plans map read',
+    )
+    const plan = plansMap && plansMap[this.courseID]
     if (plan && plan?.endDate) {
       // this.cbPlanEndDate = cbp[0].endDate
       this.cbPlanEndDate = plan.endDate
@@ -432,7 +427,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       const daysCount = dayjs(this.cbPlanEndDate).diff(this.serverDate, 'day')
       this.cbPlanDuration = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
         ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-      if (plan?.isApar) {
+      if (plan.planType === 'apar') {
         this.isAcbpCourse = true
         const eDate = dayjs(this.cbPlanEndDate).format('YYYY-MM-DD')
         if (dayjs(sDate).isSameOrBefore(eDate)) {
@@ -608,6 +603,14 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return this.assessmentAttempts.attemptsRemaining
   }
 
+  get isAssessmentCompleted(): boolean {
+    return this.enrolledCourseData?.completionPercentage === 100 && this.enrolledCourseData?.status === 2
+  }
+
+  get isAssessmentPassed(): boolean {
+    return !!this.assessmentResult && this.assessmentResult.score >= this.assessmentResult.passPercentage
+  }
+
   get totalAssessmentAttempts(): number {
     return this.assessmentAttempts.attemptsAllowed || this.contentReadData?.maxAssessmentRetakeAttempts || 0
   }
@@ -632,6 +635,24 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     //   .catch((err: any) => {
     //     this.loggerSvc.warn('Unable to resolve comprehensive assessment attempts', err)
     //   })
+  }
+
+  private loadComprehensiveAssessmentResult(): void {
+    this.assessmentResult = null
+    if (!this.isComprehensiveAssessment || !this.isAssessmentCompleted || this.forPreview) {
+      return
+    }
+    this.comprehensiveAssessmentSvc.getResult(
+      this.content,
+      this.enrolledCourseData.courseId,
+      this.enrolledCourseData.batchId,
+    )
+      .then((result: IComprehensiveAssessmentResult | null) => {
+        this.assessmentResult = result
+      })
+      .catch((err: any) => {
+        this.loggerSvc.warn('Unable to resolve comprehensive assessment result', err)
+      })
   }
 
   get isResource() {
@@ -1741,6 +1762,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         })
         this.tocSvc.checkModuleWiseData(this.content)
         this.enrolledCourseData = enrolledCourse
+        this.loadComprehensiveAssessmentResult()
         this.isCourseCompletedOnThisMonth()
         this.currentCourseBatchId = enrolledCourse.batchId
         // this.downloadCert(enrolledCourse.issuedCertificates)

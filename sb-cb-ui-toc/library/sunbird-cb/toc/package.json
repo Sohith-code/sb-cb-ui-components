@@ -18,6 +18,6 @@
     "@sunbird-cb/notification": "0.0.3-ang-17-20",
     "@sunbird-cb/rain-dashboards": "0.0.1-ang-17-20",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
-    "@sunbird-cb/utils-v2": "0.0.2-ang-17-20-unenroll"
+    "@sunbird-cb/utils-v2": "0.1.0-cbrelease-4.8.42"
   }
 }

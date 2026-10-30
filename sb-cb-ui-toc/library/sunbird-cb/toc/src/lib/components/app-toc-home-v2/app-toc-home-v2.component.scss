@@ -1357,3 +1357,20 @@ mat-divider {
     text-align: start;
   }
 }
+
+.assessment-score-card {
+  border: 1px solid #c9d6ef;
+  background-color: #eef2fb;
+
+  .score-passed {
+    color: #1b7f3b;
+  }
+
+  .score-failed {
+    color: #d13924;
+  }
+
+  .score-label {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

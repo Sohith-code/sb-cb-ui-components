@@ -8,7 +8,7 @@
     "@angular/common": "^20.3.16",
     "@angular/core": "^20.3.16",
     "@sunbird-cb/design-system": "0.0.3",
-    "@sunbird-cb/utils-v2": "0.2.4-cbrelease-4.8.41",
+    "@sunbird-cb/utils-v2": "0.1.0-cbrelease-4.8.42",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
     "@ckeditor/ckeditor5-angular": "^9.1.0",
     "ckeditor5": "^43.1.0"

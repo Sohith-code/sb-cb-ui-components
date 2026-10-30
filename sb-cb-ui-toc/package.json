@@ -65,7 +65,7 @@
     "@sunbird-cb/notification": "0.0.3-ang-17-20",
     "@sunbird-cb/rain-dashboards": "0.0.1-ang-17-20",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
-    "@sunbird-cb/utils-v2": "0.1.1-cbrelease-4.8.41.2",
+    "@sunbird-cb/utils-v2": "0.1.0-cbrelease-4.8.42",
     "@types/file-saver": "^2.0.7",
     "ckeditor5": "^43.1.0",
     "dayjs": "^1.10.7",
@@ -82,7 +82,6 @@
     "rxjs": "^6.6.6",
     "rxjs-compat": "^6.6.6",
     "tslib": "^2.0.0",
-    "zone.js": "~0.15.1",
     "xlsx": "^0.16.9",
     "zone.js": "^0.15.1"
   },

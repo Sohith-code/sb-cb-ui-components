@@ -33,6 +33,8 @@ const API_END_POINTS = {
 }
 
 const STORE_NAME = APP_DB_STORES.CBP_PLANS
+const PLANS_MAP_STORE = APP_DB_STORES.PLANS_MAP
+const PLANS_MAP_KEY = 'all'
 
 /**
  * V4 entries are keyed by the bare plan year ('2026-27') — the same key CbpPlanCacheService
@@ -114,6 +116,15 @@ export interface IUserCbpPlanCacheEntry extends IUserCbpPlanData {
   /** The year that was asked for, and the key this entry is cached under. */
   requestedPlanYear: string
   cachedAt: number
+}
+
+export type TUserCbpPlanMapType = 'apar' | 'cbp' | 'aicbp'
+
+export interface IUserCbpPlanMapEntry {
+  planType: TUserCbpPlanMapType
+  caLinkedId: string | null
+  endDate: string
+  planId: string
 }
 
 /** Request body under `request`. Unknown fields pass through to the API untouched. */
@@ -337,6 +348,65 @@ export class UserCbpPlansService {
     )
   }
 
+  private async setPlansMap(plansMap: Record<string, IUserCbpPlanMapEntry>): Promise<void> {
+    await this.appDb.withTimeout(
+      this.appDb.put(PLANS_MAP_STORE, PLANS_MAP_KEY, plansMap),
+      'plans map write',
+    )
+  }
+
+  // ── Plans map ──────────────────────────────────────────────────────────────
+
+  private buildPlansMap(data: IUserCbpPlanData): Record<string, IUserCbpPlanMapEntry> {
+    const plansMap: Record<string, IUserCbpPlanMapEntry> = {}
+    const now = Date.now()
+
+    const addPlans = (plans: IUserCbpPlan[], planType: TUserCbpPlanMapType) => {
+      plans.forEach((plan: IUserCbpPlan) => {
+        (plan.contentList || []).forEach((content: IUserCbpPlanContent) => {
+          const doId = content && content.identifier
+          if (!doId) {
+            return
+          }
+          const candidate: IUserCbpPlanMapEntry = {
+            planType,
+            caLinkedId: plan.caLinkedId || null,
+            endDate: plan.endDate,
+            planId: plan.planId,
+          }
+          const current = plansMap[doId]
+          if (!current || this.planOutranks(candidate, current, now)) {
+            plansMap[doId] = candidate
+          }
+        })
+      })
+    }
+
+    addPlans(data.aparPlanList, 'apar')
+    addPlans(data.cbpPlanList, 'cbp')
+    addPlans(data.aiCbpPlanList, 'aicbp')
+    return plansMap
+  }
+
+  // A content in several plans: APAR first, then open over ended, then the soonest open end
+  // date (or the latest ended one).
+  private planOutranks(candidate: IUserCbpPlanMapEntry, current: IUserCbpPlanMapEntry, now: number): boolean {
+    const candidateApar = candidate.planType === 'apar'
+    const currentApar = current.planType === 'apar'
+    if (candidateApar !== currentApar) {
+      return candidateApar
+    }
+
+    const candidateEnd = Date.parse(candidate.endDate)
+    const currentEnd = Date.parse(current.endDate)
+    const candidateOpen = candidateEnd >= now
+    const currentOpen = currentEnd >= now
+    if (candidateOpen !== currentOpen) {
+      return candidateOpen
+    }
+    return candidateOpen ? candidateEnd < currentEnd : candidateEnd > currentEnd
+  }
+
   // ── Fetch and transform ────────────────────────────────────────────────────
 
   private async fetchAndCache(
@@ -372,6 +442,7 @@ export class UserCbpPlansService {
       // caching that would stop the request being made at all until the TTL expires.
       if (entry.aparPlan || entry.cbpPlan || entry.aiCbpPlan) {
         await this.setCacheEntry(planYear, entry)
+        await this.setPlansMap(this.buildPlansMap(entry))
       }
       return entry
     } catch (err) {
