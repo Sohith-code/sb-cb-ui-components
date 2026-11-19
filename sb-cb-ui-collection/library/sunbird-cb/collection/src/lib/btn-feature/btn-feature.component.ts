@@ -187,6 +187,8 @@ export class BtnFeatureComponent extends WidgetBaseComponent
       window.open('/app/my-dashboard/dashboard-view', '_blank')
     } else if (value === 'mdo') {
       window.open('/app/my-dashboard', '_blank')
+    } else if (value === 'aiCbp') {
+      window.open('/app/my-dashboard/ai-cbp-dashboard', '_blank')
     }
   }
 }

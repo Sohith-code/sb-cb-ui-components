@@ -98,7 +98,7 @@
   </a>
 </ng-template>
 <ng-template #cardMini let-actionBtn="actionBtn" let-config="config">
-  <a *ngIf="!(actionBtn?.dashboardVisibility?.mdo || actionBtn?.dashboardVisibility?.myIgot)" role="link" matRipple
+  <a *ngIf="!(actionBtn?.dashboardVisibility?.mdo || actionBtn?.dashboardVisibility?.myIgot || actionBtn?.dashboardVisibility?.aiCbp)" role="link" matRipple
     [title]="actionBtn?.name" routerLink={{actionBtn.url}} active [wsWidgetUrlResolver]="actionBtn.isExternal"
     [attr.aria-label]="actionBtn.name" role="link" routerLinkActive="ws-mat-selected-home-menu"
     class="flex items-center flex-col px-4 box-sizing-box rem">
@@ -107,7 +107,7 @@
               icon: widgetData.actionBtn?.icon
             }"></ng-container>
   </a>
-  <div *ngIf="actionBtn?.dashboardVisibility?.mdo || actionBtn?.dashboardVisibility?.myIgot"
+  <div *ngIf="actionBtn?.dashboardVisibility?.mdo || actionBtn?.dashboardVisibility?.myIgot || actionBtn?.dashboardVisibility?.aiCbp"
     class="dashboard-wrapper flex items-center flex-col px-4 box-sizing-box rem">
     <button class="dashboard-icon-btn" type="button" [title]="actionBtn?.name || 'Dashboard'"
       [attr.aria-label]="actionBtn?.name || 'Dashboard'" [attr.aria-expanded]="showDashboardOptions"
@@ -125,6 +125,9 @@
       <button *ngIf="actionBtn?.dashboardVisibility?.myIgot" type="button"
         title="This dashboard is for the reports related to Training Plan, which reflects to learners under their My iGOT section."
         (click)="onDashboardSelect('igot')">My iGOT Dashboard</button>
+      <button *ngIf="actionBtn?.dashboardVisibility?.aiCbp" type="button"
+        title="This dashboard is for the reports related to AI-generated Capacity Building Plans."
+        (click)="onDashboardSelect('aiCbp')">AI CBP Dashboard</button>
     </div>
   </div>
 </ng-template>
